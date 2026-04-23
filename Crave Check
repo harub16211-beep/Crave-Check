@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Crave Check</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: linear-gradient(135deg, #fff3e0, #e8f5e9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Card */
+.container {
+    width: 90%;
+    max-width: 500px;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0px 5px 20px rgba(0,0,0,0.2);
+}
+
+/* Buttons */
+button {
+    padding: 10px 15px;
+    margin: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.start-btn {
+    background: #4caf50;
+    color: white;
+}
+
+.option {
+    display: block;
+    background: #f1f1f1;
+    margin: 10px 0;
+}
+
+.option:hover {
+    background: #ddd;
+}
+
+/* Colors */
+.correct { background: #4caf50 !important; color: white; }
+.wrong { background: #f44336 !important; color: white; }
+
+.hidden { display: none; }
+</style>
+</head>
+
+<body>
+
+<!-- Music -->
+<audio id="bgMusic" loop>
+<source src="https://www.bensound.com/bensound-music/bensound-slowmotion.mp3" type="audio/mp3">
+</audio>
+
+<div class="container">
+
+<!-- START SCREEN -->
+<div id="startScreen">
+    <h1>Crave Check 🍔🧠</h1>
+    <p>“Do you eat because you're hungry… or stressed?”</p>
+    <button class="start-btn" onclick="startGame()">Start Game</button>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quizScreen" class="hidden">
+    <h3 id="question"></h3>
+    <div id="options"></div>
+    <p id="feedback"></p>
+</div>
+
+<!-- RESULT SCREEN -->
+<div id="resultScreen" class="hidden">
+    <h2>Final Score: <span id="scoreText"></span></h2>
+    <p id="resultMsg"></p>
+    <button onclick="restartGame()">Play Again 🔄</button>
+</div>
+
+</div>
+
+<script>
+
+// Play music on first click
+document.addEventListener("click", function () {
+    document.getElementById("bgMusic").play();
+}, { once: true });
+
+// Questions pool (will shuffle)
+const allQuestions = [
+{
+q: "What hormone increases cravings during stress?",
+options: ["Insulin", "Cortisol", "Adrenaline", "Melatonin"],
+answer: "Cortisol",
+explanation: "Cortisol is released during stress and increases cravings for high-calorie food."
+},
+{
+q: "Eating after a bad day is an example of?",
+options: ["Physical hunger", "Emotional eating", "Protein craving", "Hydration need"],
+answer: "Emotional eating",
+explanation: "Emotional eating is when food is used to cope with feelings."
+},
+{
+q: "Which is a sign of stress eating?",
+options: ["Eating when full", "Eating due to hunger", "Skipping meals", "Eating slowly"],
+answer: "Eating when full",
+explanation: "Stress eating often ignores real hunger signals."
+},
+{
+q: "Which helps reduce emotional eating?",
+options: ["Mindful eating", "Fast eating", "Skipping meals", "Stress increase"],
+answer: "Mindful eating",
+explanation: "Mindful eating helps you understand true hunger signals."
+},
+{
+q: "Cortisol is mainly related to:",
+options: ["Stress", "Digestion", "Sleep", "Memory"],
+answer: "Stress",
+explanation: "Cortisol is a stress hormone."
+}
+];
+
+let questions = [];
+let current = 0;
+let score = 0;
+
+// Shuffle function
+function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+}
+
+// Start Game
+function startGame() {
+    questions = shuffle(allQuestions).slice(0, 5);
+    current = 0;
+    score = 0;
+
+    document.getElementById("startScreen").classList.add("hidden");
+    document.getElementById("quizScreen").classList.remove("hidden");
+
+    showQuestion();
+}
+
+// Show Question
+function showQuestion() {
+    let q = questions[current];
+    document.getElementById("question").innerText = q.q;
+
+    let optionsDiv = document.getElementById("options");
+    optionsDiv.innerHTML = "";
+
+    q.options.forEach(opt => {
+        let btn = document.createElement("button");
+        btn.classList.add("option");
+        btn.innerText = opt;
+        btn.onclick = () => checkAnswer(opt, btn);
+        optionsDiv.appendChild(btn);
+    });
+
+    document.getElementById("feedback").innerText = "";
+}
+
+// Check Answer
+function checkAnswer(selected, btn) {
+    let q = questions[current];
+
+    if (selected === q.answer) {
+        btn.classList.add("correct");
+        score++;
+        document.getElementById("feedback").innerText = "Correct ✅ " + q.explanation;
+    } else {
+        btn.classList.add("wrong");
+        document.getElementById("feedback").innerText = "Wrong ❌ " + q.explanation;
+    }
+
+    setTimeout(nextQuestion, 1500);
+}
+
+// Next
+function nextQuestion() {
+    current++;
+
+    if (current < questions.length) {
+        showQuestion();
+    } else {
+        showResult();
+    }
+}
+
+// Result Screen
+function showResult() {
+    document.getElementById("quizScreen").classList.add("hidden");
+    document.getElementById("resultScreen").classList.remove("hidden");
+
+    document.getElementById("scoreText").innerText = score + " / " + questions.length;
+
+    let msg = "";
+
+    if (score <= 2) {
+        msg = "You may be an emotional eater. Try mindful eating 🧠";
+    } else if (score <= 4) {
+        msg = "You are improving but still learning 🌱";
+    } else {
+        msg = "You manage stress and eating very well 💪";
+    }
+
+    document.getElementById("resultMsg").innerText = msg;
+}
+
+// Restart
+function restartGame() {
+    document.getElementById("resultScreen").classList.add("hidden");
+    document.getElementById("startScreen").classList.remove("hidden");
+}
+
+</script>
+
+</body>
+</html>
